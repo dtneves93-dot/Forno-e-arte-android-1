@@ -1,0 +1,29 @@
+*.iml
+.gradle/
+.idea/
+local.properties
+build/
+**/build/
+captures/
+.DS_Store
+
+# Pacotes e artefatos Android gerados
+*.apk
+*.aab
+*.ap_
+*.aar
+*.dex
+*.class
+*.jar
+*.so
+*.hprof
+
+# Saídas de ferramentas, assinaturas e credenciais locais
+out/
+bin/
+.externalNativeBuild/
+.cxx/
+*.jks
+*.keystore
+keystore.properties
+signing.properties
