@@ -83,7 +83,117 @@ private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
 @Composable private fun Field(v:String,change:(String)->Unit,label:String,type:KeyboardType=KeyboardType.Text){OutlinedTextField(v,change,Modifier.fillMaxWidth(),label={Text(label)},keyboardOptions=KeyboardOptions(keyboardType=type),maxLines=if(label=="Observações")3 else 1)}
 @Composable private fun Dropdown(value:String,options:List<String>,pick:(String)->Unit){var open by remember{mutableStateOf(false)};Box{OutlinedButton({open=true},Modifier.fillMaxWidth()){Text(value,Modifier.weight(1f));Icon(Icons.Default.ArrowDropDown,null)};DropdownMenu(open,{open=false}){options.forEach{DropdownMenuItem({Text(it)},{pick(it);open=false})}}}}
 
-@Composable private fun DetailScreen(order:OrderEntity,vm:OrderViewModel,back:()->Unit,edit:()->Unit){val context=LocalContext.current;var deleteConfirm by remember{mutableStateOf(false)};Column(Modifier.fillMaxSize().background(Cream)){Header("Pedido #${order.id}",order.customerName,back);LazyColumn(contentPadding=PaddingValues(16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){item{Card{Column(Modifier.padding(16.dp)){Text("Cliente",fontWeight=FontWeight.Bold,color=Wine);Text(order.customerName);Text(order.phone);Text(order.address)}}};item{Card{Column(Modifier.padding(16.dp)){Text("Pedido",fontWeight=FontWeight.Bold,color=Wine);Text("${order.quantity}× ${order.items} • ${order.size}");Text("Sabores: ${order.flavors}");if(order.extras.isNotBlank())Text("Adicionais: ${order.extras}");if(order.notes.isNotBlank())Text("Obs.: ${order.notes}");HorizontalDivider(Modifier.padding(vertical=10.dp));Text("Total: ${currency.format(order.total)}",fontWeight=FontWeight.Bold);Text("Pagamento: ${order.paymentMethod.label}")}}};item{Section("Atualizar status")};items(OrderStatus.entries){status->OutlinedButton(onClick={vm.setStatus(order,status){openWhatsApp(context,order.phone,whatsappMessage(order,status))}},Modifier.fillMaxWidth(),enabled=order.status!=status){Icon(if(order.status==status)Icons.Default.CheckCircle else Icons.Default.Chat,null);Spacer(Modifier.width(8.dp));Text(if(order.status==status)"${status.label} (atual)" else "${status.label} • avisar no WhatsApp")}};item{Button({shareReceiptPdf(context,order)},Modifier.fillMaxWidth()){Icon(Icons.Default.PictureAsPdf,null);Spacer(Modifier.width(8.dp));Text("Compartilhar comprovante PDF")}};item{Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){OutlinedButton(edit,Modifier.weight(1f)){Icon(Icons.Default.Edit,null);Text(" Editar")};OutlinedButton({deleteConfirm=true},Modifier.weight(1f),colors=ButtonDefaults.outlinedButtonColors(contentColor=MaterialTheme.colorScheme.error)){Icon(Icons.Default.Delete,null);Text(" Excluir")}}};item{Spacer(Modifier.height(20.dp))}}};if(deleteConfirm)AlertDialog({deleteConfirm=false},title={Text("Excluir pedido?")},text={Text("Esta ação não poderá ser desfeita.")},confirmButton={TextButton({vm.delete(order);deleteConfirm=false;back()}){Text("Excluir")}},dismissButton={TextButton({deleteConfirm=false}){Text("Cancelar")}})}
+@Composable
+private fun DetailScreen(
+    order: OrderEntity,
+    vm: OrderViewModel,
+    back: () -> Unit,
+    edit: () -> Unit,
+) {
+    val context = LocalContext.current
+    var deleteConfirm by remember { mutableStateOf(false) }
+
+    Column(Modifier.fillMaxSize().background(Cream)) {
+        Header("Pedido #${order.id}", order.customerName, back)
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item {
+                Card {
+                    Column(Modifier.padding(16.dp)) {
+                        Text("Cliente", fontWeight = FontWeight.Bold, color = Wine)
+                        Text(order.customerName)
+                        Text(order.phone)
+                        Text(order.address)
+                    }
+                }
+            }
+            item {
+                Card {
+                    Column(Modifier.padding(16.dp)) {
+                        Text("Pedido", fontWeight = FontWeight.Bold, color = Wine)
+                        Text("${order.quantity}× ${order.items} • ${order.size}")
+                        Text("Sabores: ${order.flavors}")
+                        if (order.extras.isNotBlank()) Text("Adicionais: ${order.extras}")
+                        if (order.notes.isNotBlank()) Text("Obs.: ${order.notes}")
+                        HorizontalDivider(Modifier.padding(vertical = 10.dp))
+                        Text("Total: ${currency.format(order.total)}", fontWeight = FontWeight.Bold)
+                        Text("Pagamento: ${order.paymentMethod.label}")
+                    }
+                }
+            }
+            item { Section("Atualizar status") }
+            items(OrderStatus.entries) { status ->
+                OutlinedButton(
+                    onClick = {
+                        vm.setStatus(order, status) {
+                            openWhatsApp(context, order.phone, whatsappMessage(order, status))
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = order.status != status,
+                ) {
+                    Icon(
+                        if (order.status == status) Icons.Default.CheckCircle else Icons.Default.Chat,
+                        contentDescription = null,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        if (order.status == status) "${status.label} (atual)"
+                        else "${status.label} • avisar no WhatsApp",
+                    )
+                }
+            }
+            item {
+                Button(
+                    onClick = { shareReceiptPdf(context, order) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Default.PictureAsPdf, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Compartilhar comprovante PDF")
+                }
+            }
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = edit, modifier = Modifier.weight(1f)) {
+                        Icon(Icons.Default.Edit, contentDescription = null)
+                        Text(" Editar")
+                    }
+                    OutlinedButton(
+                        onClick = { deleteConfirm = true },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                        ),
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = null)
+                        Text(" Excluir")
+                    }
+                }
+            }
+            item { Spacer(Modifier.height(20.dp)) }
+        }
+    }
+
+    if (deleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { deleteConfirm = false },
+            title = { Text("Excluir pedido?") },
+            text = { Text("Esta ação não poderá ser desfeita.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.delete(order)
+                    deleteConfirm = false
+                    back()
+                }) { Text("Excluir") }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteConfirm = false }) { Text("Cancelar") }
+            },
+        )
+    }
 }
 
 @Composable private fun PaymentsScreen(orders:List<OrderEntity>){val scope=rememberCoroutineScope();val gateway=remember{SimulatedInfinityPayGateway()};var selected by remember{mutableStateOf<OrderEntity?>(null)};var method by remember{mutableStateOf(PaymentMethod.PIX)};var result by remember{mutableStateOf<String?>(null)};var loading by remember{mutableStateOf(false)};Column(Modifier.fillMaxSize().background(Cream)){Header("Pagamentos","InfinityPay • modo simulado");LazyColumn(contentPadding=PaddingValues(16.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{Card(colors=CardDefaults.cardColors(containerColor=Color(0xFFFFF0D0))){Row(Modifier.padding(16.dp)){Icon(Icons.Default.Info,null,tint=Wine);Spacer(Modifier.width(10.dp));Text("Ambiente seguro de demonstração. A integração real exige credenciais configuradas em um servidor, nunca no aplicativo.")}}};item{Section("Selecione um pedido")};if(orders.isEmpty())item{Empty("Cadastre um pedido para simular o pagamento")}else items(orders.take(10)){o->Card(onClick={selected=o;result=null},colors=CardDefaults.cardColors(containerColor=if(selected?.id==o.id)Color(0xFFFFE5DF)else Color.White)){Row(Modifier.fillMaxWidth().padding(16.dp)){Text("#${o.id} • ${o.customerName}",Modifier.weight(1f),fontWeight=FontWeight.Bold);Text(currency.format(o.total))}}};item{Section("Forma de cobrança")};item{Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)){listOf(PaymentMethod.PIX,PaymentMethod.CARD,PaymentMethod.PAYMENT_LINK).forEach{FilterChip(selected=method==it,onClick={method=it},label={Text(it.label)})}}};item{Button(onClick={selected?.let{o->loading=true;result=null;scope.launch{result=when(val r=gateway.createPayment(PaymentRequest(o.id,o.total,method))){is PaymentResult.Success->"Cobrança simulada criada! Referência: ${r.reference}${r.paymentUrl?.let{"\nLink: $it"}.orEmpty()}";is PaymentResult.Error->r.message};loading=false}}},enabled=selected!=null&&!loading,modifier=Modifier.fillMaxWidth().height(54.dp)){if(loading)CircularProgressIndicator(Modifier.size(22.dp),color=Color.White)else Text("Simular cobrança")}};result?.let{item{Card(colors=CardDefaults.cardColors(containerColor=Color(0xFFDDF3E4))){Text(it,Modifier.padding(16.dp),color=Color(0xFF175C2D),fontWeight=FontWeight.Bold)}}}}}}
