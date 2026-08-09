@@ -19,7 +19,7 @@ class Converters {
     @Delete suspend fun delete(order: OrderEntity)
 }
 
-@Database(entities = [OrderEntity::class], version = 1, exportSchema = true)
+@Database(entities = [OrderEntity::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun orderDao(): OrderDao

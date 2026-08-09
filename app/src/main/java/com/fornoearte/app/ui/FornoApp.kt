@@ -57,8 +57,26 @@ private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
 @Composable private fun StatusChip(status:OrderStatus){SuggestionChip(onClick={},label={Text(status.label)},colors=SuggestionChipDefaults.suggestionChipColors(containerColor=when(status){OrderStatus.DELIVERED->Color(0xFFDDF3E4);OrderStatus.OUT_FOR_DELIVERY->Color(0xFFFFE7C2);else->Color(0xFFF3DDDD)}))}
 
 @Composable private fun OrderForm(existing:OrderEntity?=null,onBack:()->Unit,onSave:(OrderEntity)->Unit){
-    var name by remember{mutableStateOf(existing?.customerName.orEmpty())};var phone by remember{mutableStateOf(existing?.phone.orEmpty())};var address by remember{mutableStateOf(existing?.address.orEmpty())};var items by remember{mutableStateOf(existing?.items?:"Pizza")};var flavors by remember{mutableStateOf(existing?.flavors.orEmpty())};var size by remember{mutableStateOf(existing?.size?:"Grande")};var qty by remember{mutableStateOf((existing?.quantity?:1).toString())};var extras by remember{mutableStateOf(existing?.extras.orEmpty())};var notes by remember{mutableStateOf(existing?.notes.orEmpty())};var price by remember{mutableStateOf(existing?.unitPrice?.toString().orEmpty())};var fee by remember{mutableStateOf(existing?.deliveryFee?.toString()? :"0")};var discount by remember{mutableStateOf(existing?.discount?.toString()? :"0")};var payment by remember{mutableStateOf(existing?.paymentMethod?:PaymentMethod.PIX)};var error by remember{mutableStateOf<String?>(null)}
-    fun number(s:String)=s.replace(",",".").toDoubleOrNull()?:0.0; val total=(number(price)*(qty.toIntOrNull()?:0)+number(fee)-number(discount)).coerceAtLeast(0.0)
+    var name by remember { mutableStateOf(existing?.customerName.orEmpty()) }
+    var phone by remember { mutableStateOf(existing?.phone.orEmpty()) }
+    var address by remember { mutableStateOf(existing?.address.orEmpty()) }
+    var items by remember { mutableStateOf(existing?.items ?: "Pizza") }
+    var flavors by remember { mutableStateOf(existing?.flavors.orEmpty()) }
+    var size by remember { mutableStateOf(existing?.size ?: "Grande") }
+    var qty by remember { mutableStateOf((existing?.quantity ?: 1).toString()) }
+    var extras by remember { mutableStateOf(existing?.extras.orEmpty()) }
+    var notes by remember { mutableStateOf(existing?.notes.orEmpty()) }
+    var price by remember { mutableStateOf(existing?.unitPrice?.toString().orEmpty()) }
+    var fee by remember { mutableStateOf(existing?.deliveryFee?.toString() ?: "0") }
+    var discount by remember { mutableStateOf(existing?.discount?.toString() ?: "0") }
+    var payment by remember { mutableStateOf(existing?.paymentMethod ?: PaymentMethod.PIX) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    fun number(value: String): Double = value.replace(",", ".").toDoubleOrNull() ?: 0.0
+
+    val total = (
+        number(price) * (qty.toIntOrNull() ?: 0) + number(fee) - number(discount)
+    ).coerceAtLeast(0.0)
     Column(Modifier.fillMaxSize().background(Cream)){Header(if(existing==null)"Novo pedido" else "Editar pedido","Preencha os dados abaixo",onBack);LazyColumn(contentPadding=PaddingValues(16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){item{Section("Cliente")};item{Field(name,{name=it},"Nome *")};item{Field(phone,{phone=it},"Telefone *",KeyboardType.Phone)};item{Field(address,{address=it},"Endereço de entrega *")};item{Section("Itens do pedido")};item{Field(items,{items=it},"Itens *")};item{Field(flavors,{flavors=it},"Sabores *")};item{Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){Box(Modifier.weight(1f)){Dropdown(size,listOf("Broto","Média","Grande","Família")){size=it}};Box(Modifier.weight(1f)){Field(qty,{qty=it},"Quantidade *",KeyboardType.Number)}}};item{Field(extras,{extras=it},"Adicionais")};item{Field(notes,{notes=it},"Observações")};item{Section("Valores e pagamento")};item{Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){Box(Modifier.weight(1f)){Field(price,{price=it},"Valor unitário *",KeyboardType.Decimal)};Box(Modifier.weight(1f)){Field(fee,{fee=it},"Taxa entrega",KeyboardType.Decimal)}}};item{Field(discount,{discount=it},"Desconto",KeyboardType.Decimal)};item{Dropdown(payment.label,PaymentMethod.entries.map{it.label}){label->payment=PaymentMethod.entries.first{it.label==label}}};item{Card(colors=CardDefaults.cardColors(containerColor=Wine)){Row(Modifier.fillMaxWidth().padding(20.dp),horizontalArrangement=Arrangement.SpaceBetween){Text("Total",color=Color.White);Text(currency.format(total),color=Color.White,fontWeight=FontWeight.Bold,style=MaterialTheme.typography.titleLarge)}}};error?.let{item{Text(it,color=MaterialTheme.colorScheme.error)}};item{Button(onClick={if(name.isBlank()||phone.filter(Char::isDigit).length<10||address.isBlank()||flavors.isBlank()||number(price)<=0||qty.toIntOrNull()==null){error="Preencha os campos obrigatórios e informe um telefone e valores válidos"}else onSave(OrderEntity(existing?.id?:0,name.trim(),phone.trim(),address.trim(),items.trim(),flavors.trim(),size,qty.toInt(),extras.trim(),notes.trim(),number(price),number(fee),number(discount),payment,existing?.status?:OrderStatus.RECEIVED,existing?.createdAt?:System.currentTimeMillis()))},modifier=Modifier.fillMaxWidth().height(54.dp)){Text("Salvar pedido")}};item{Spacer(Modifier.height(24.dp))}}}
 }
 @Composable private fun Section(s:String)=Text(s,style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.Bold,color=Wine)
