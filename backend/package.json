@@ -1,0 +1,20 @@
+{
+  "name": "forno-e-arte-whatsapp-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Atendente virtual da Forno e Arte para WhatsApp Business Cloud API.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "check": "node --check src/server.js && node --check src/chatbot.js && node --check src/menu.js && node --check src/orderStore.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "openai": "^5.0.0"
+  }
+}
