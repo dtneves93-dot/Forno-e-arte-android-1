@@ -2,8 +2,16 @@ import OpenAI from "openai";
 import { MENU, calculateOrder } from "./menu.js";
 import { createOrder } from "./orderStore.js";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let openaiClient;
 const sessions = new Map();
+
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY não configurada");
+  }
+  openaiClient ||= new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return openaiClient;
+}
 
 const tools = [
   {
@@ -212,10 +220,7 @@ async function executeTool(call, phone, notifyOwner) {
 }
 
 export async function getAssistantReply({ phone, text, notifyOwner }) {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY não configurada");
-  }
-
+  const openai = getOpenAIClient();
   const history = getHistory(phone);
   let input = [...history, { role: "user", content: text }];
   let response;
