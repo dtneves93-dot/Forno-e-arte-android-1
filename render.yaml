@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: forno-e-arte-whatsapp-bot
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: OPENAI_MODEL
+        value: gpt-5
+      - key: GRAPH_API_VERSION
+        value: v23.0
+      - key: PIZZA_DRINK_COMBO_PRICE
+        value: "0"
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ADMIN_API_TOKEN
+        sync: false
+      - key: OWNER_ALERT_NUMBER
+        sync: false
